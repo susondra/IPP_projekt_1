@@ -1,0 +1,126 @@
+program
+  class
+    Main
+    Object
+    method
+      selector	run
+      block
+        block_par
+        block_stat
+          x
+          expr
+            expr_base	self
+            expr_tail
+              expr_sel
+                compute:
+                expr_base	3
+                expr_sel
+                  and:
+                  expr_base	2
+                  expr_sel
+                    and:
+                    expr_base	5
+                    expr_sel
+          x
+          expr
+            expr_base	self
+            expr_tail
+              expr_sel
+                plusOne:
+                expr_base
+                  expr
+                    expr_base	self
+                    expr_tail	vysl
+                expr_sel
+          y
+          expr
+            expr_base	x
+            expr_tail	asString
+      method
+
+build_selector  Tree(Token('RULE', 'expr_tail'), [Tree(Token('RULE', 'expr_sel'), [Token('IDCOLON', 'compute:'), Tree(Token('RULE', 'expr_base'), [Token('INT', '3')]), Tree(Token('RULE', 'expr_sel'), [Token('IDCOLON', 'and:'), Tree(Token('RULE', 'expr_base'), [Token('INT', '2')]), Tree(Token('RULE', 'expr_sel'), [Token('IDCOLON', 'and:'), Tree(Token('RULE', 'expr_base'), [Token('INT', '5')]), Tree(Token('RULE', 'expr_sel'), [])])])])])
+build_selector  Tree(Token('RULE', 'expr_tail'), [Tree(Token('RULE', 'expr_sel'), [Token('IDCOLON', 'plusOne:'), Tree(Token('RULE', 'expr_base'), [Tree(Token('RULE', 'expr'), [Tree(Token('RULE', 'expr_base'), [Token('ID', 'self')]), Tree(Token('RULE', 'expr_tail'), [Token('ID', 'vysl')])])]), Tree(Token('RULE', 'expr_sel'), [])])])
+build_selector  Tree(Token('RULE', 'expr_tail'), [Token('ID', 'vysl')])
+build_selector  Tree(Token('RULE', 'expr_tail'), [Token('ID', 'asString')])
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="SOL25">
+  <class name="Main" parent="Object">
+    <method selector="run">
+      <block arity="0">
+        <assign order="1">
+          <var name="x"/>
+          <send selector="chyba, failed _build_selector">
+            <expr_base>
+              <var name="self"/>
+            </expr_base>
+            <arg order="1">
+              <expr_tail>
+                <expr_sel>
+                  <token type="IDCOLON">compute:</token>
+                  <expr_base>
+                    <token type="INT">3</token>
+                  </expr_base>
+                  <expr_sel>
+                    <token type="IDCOLON">and:</token>
+                    <expr_base>
+                      <token type="INT">2</token>
+                    </expr_base>
+                    <expr_sel>
+                      <token type="IDCOLON">and:</token>
+                      <expr_base>
+                        <token type="INT">5</token>
+                      </expr_base>
+                      <expr_sel/>
+                    </expr_sel>
+                  </expr_sel>
+                </expr_sel>
+              </expr_tail>
+            </arg>
+          </send>
+        </assign>
+        <assign order="2">
+          <var name="x"/>
+          <send selector="chyba, failed _build_selector">
+            <expr_base>
+              <var name="self"/>
+            </expr_base>
+            <arg order="1">
+              <expr_tail>
+                <expr_sel>
+                  <token type="IDCOLON">plusOne:</token>
+                  <expr_base>
+                    <send selector="chyba, failed _build_selector">
+                      <expr_base>
+                        <var name="self"/>
+                      </expr_base>
+                      <arg order="1">
+                        <expr_tail>
+                          <var name="vysl"/>
+                        </expr_tail>
+                      </arg>
+                    </send>
+                  </expr_base>
+                  <expr_sel/>
+                </expr_sel>
+              </expr_tail>
+            </arg>
+          </send>
+        </assign>
+        <assign order="3">
+          <var name="y"/>
+          <send selector="chyba, failed _build_selector">
+            <expr_base>
+              <var name="x"/>
+            </expr_base>
+            <arg order="1">
+              <expr_tail>
+                <var name="asString"/>
+              </expr_tail>
+            </arg>
+          </send>
+        </assign>
+      </block>
+    </method>
+  </class>
+</program>
+

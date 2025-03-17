@@ -1,0 +1,26 @@
+program
+  class
+    Main
+    Object
+    method
+      selector	run
+      block
+        block_par
+          :x
+          :y
+        block_stat
+      method
+
+Tree(Token('RULE', 'block'), [Tree(Token('RULE', 'block_par'), [Token('COLONID', ':x'), Token('COLONID', ':y')]), Tree(Token('RULE', 'block_stat'), [])])
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="SOL25">
+  <class name="Main" parent="Object">
+    <method selector="run">
+      <block arity="0">
+        <parameter order="1" name="x"/>
+        <parameter order="2" name="y"/>
+      </block>
+    </method>
+  </class>
+</program>
+

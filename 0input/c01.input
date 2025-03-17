@@ -1,0 +1,12 @@
+ class Main : Object {
+ run [|
+ a := A new.
+ b := [ :arg | y := self attr: arg. z := self. ].
+ c := a foo: b.
+ ]
+ }
+ class A : Object {
+ foo: [ :x |
+ u := x value: 1.
+ ]
+ }

@@ -1,0 +1,167 @@
+program
+  class
+    Main
+    Object
+    method
+      selector	run
+      block
+        block_par
+        block_stat
+          a
+          expr
+            expr_base	A
+            expr_tail	new
+          b
+          expr
+            expr_base
+              block
+                block_par	:arg
+                block_stat
+                  y
+                  expr
+                    expr_base	self
+                    expr_tail
+                      expr_sel
+                        attr:
+                        expr_base	arg
+                        expr_sel
+                  z
+                  expr
+                    expr_base	self
+                    expr_tail
+                      expr_sel
+            expr_tail
+              expr_sel
+          c
+          expr
+            expr_base	a
+            expr_tail
+              expr_sel
+                foo:
+                expr_base	b
+                expr_sel
+      method
+  class
+    A
+    Object
+    method
+      selector	foo:
+      block
+        block_par	:x
+        block_stat
+          u
+          expr
+            expr_base	x
+            expr_tail
+              expr_sel
+                value:
+                expr_base	1
+                expr_sel
+      method
+
+block_stat [Token('ID', 'a'), Tree(Token('RULE', 'expr'), [Tree(Token('RULE', 'expr_base'), [Token('CID', 'A')]), Tree(Token('RULE', 'expr_tail'), [Token('ID', 'new')])]), Token('ID', 'b'), Tree(Token('RULE', 'expr'), [Tree(Token('RULE', 'expr_base'), [Tree(Token('RULE', 'block'), [Tree(Token('RULE', 'block_par'), [Token('COLONID', ':arg')]), Tree(Token('RULE', 'block_stat'), [Token('ID', 'y'), Tree(Token('RULE', 'expr'), [Tree(Token('RULE', 'expr_base'), [Token('ID', 'self')]), Tree(Token('RULE', 'expr_tail'), [Tree(Token('RULE', 'expr_sel'), [Token('IDCOLON', 'attr:'), Tree(Token('RULE', 'expr_base'), [Token('ID', 'arg')]), Tree(Token('RULE', 'expr_sel'), [])])])]), Token('ID', 'z'), Tree(Token('RULE', 'expr'), [Tree(Token('RULE', 'expr_base'), [Token('ID', 'self')]), Tree(Token('RULE', 'expr_tail'), [Tree(Token('RULE', 'expr_sel'), [])])])])])]), Tree(Token('RULE', 'expr_tail'), [Tree(Token('RULE', 'expr_sel'), [])])]), Token('ID', 'c'), Tree(Token('RULE', 'expr'), [Tree(Token('RULE', 'expr_base'), [Token('ID', 'a')]), Tree(Token('RULE', 'expr_tail'), [Tree(Token('RULE', 'expr_sel'), [Token('IDCOLON', 'foo:'), Tree(Token('RULE', 'expr_base'), [Token('ID', 'b')]), Tree(Token('RULE', 'expr_sel'), [])])])])]
+block_stat [Token('ID', 'y'), Tree(Token('RULE', 'expr'), [Tree(Token('RULE', 'expr_base'), [Token('ID', 'self')]), Tree(Token('RULE', 'expr_tail'), [Tree(Token('RULE', 'expr_sel'), [Token('IDCOLON', 'attr:'), Tree(Token('RULE', 'expr_base'), [Token('ID', 'arg')]), Tree(Token('RULE', 'expr_sel'), [])])])]), Token('ID', 'z'), Tree(Token('RULE', 'expr'), [Tree(Token('RULE', 'expr_base'), [Token('ID', 'self')]), Tree(Token('RULE', 'expr_tail'), [Tree(Token('RULE', 'expr_sel'), [])])])]
+block_stat [Token('ID', 'u'), Tree(Token('RULE', 'expr'), [Tree(Token('RULE', 'expr_base'), [Token('ID', 'x')]), Tree(Token('RULE', 'expr_tail'), [Tree(Token('RULE', 'expr_sel'), [Token('IDCOLON', 'value:'), Tree(Token('RULE', 'expr_base'), [Token('INT', '1')]), Tree(Token('RULE', 'expr_sel'), [])])])])]
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="SOL25">
+  <class name="Main" parent="Object">
+    <method selector="run">
+      <block arity="0">
+        <assign order="1">
+          <var name="a"/>
+          <expr>
+            <expr_base>
+              <token type="CID">A</token>
+            </expr_base>
+            <expr_tail>
+              <var name="new"/>
+            </expr_tail>
+          </expr>
+        </assign>
+        <assign order="2">
+          <var name="b"/>
+          <expr>
+            <expr_base>
+              <block arity="0">
+                <parameter order="1" name="arg"/>
+                <assign order="1">
+                  <var name="y"/>
+                  <expr>
+                    <expr_base>
+                      <var name="self"/>
+                    </expr_base>
+                    <expr_tail>
+                      <expr_sel>
+                        <token type="IDCOLON">attr:</token>
+                        <expr_base>
+                          <var name="arg"/>
+                        </expr_base>
+                        <expr_sel/>
+                      </expr_sel>
+                    </expr_tail>
+                  </expr>
+                </assign>
+                <assign order="2">
+                  <var name="z"/>
+                  <expr>
+                    <expr_base>
+                      <var name="self"/>
+                    </expr_base>
+                    <expr_tail>
+                      <expr_sel/>
+                    </expr_tail>
+                  </expr>
+                </assign>
+              </block>
+            </expr_base>
+            <expr_tail>
+              <expr_sel/>
+            </expr_tail>
+          </expr>
+        </assign>
+        <assign order="3">
+          <var name="c"/>
+          <expr>
+            <expr_base>
+              <var name="a"/>
+            </expr_base>
+            <expr_tail>
+              <expr_sel>
+                <token type="IDCOLON">foo:</token>
+                <expr_base>
+                  <var name="b"/>
+                </expr_base>
+                <expr_sel/>
+              </expr_sel>
+            </expr_tail>
+          </expr>
+        </assign>
+      </block>
+    </method>
+  </class>
+  <class name="A" parent="Object">
+    <method selector="foo:">
+      <block arity="1">
+        <parameter order="1" name="x"/>
+        <assign order="1">
+          <var name="u"/>
+          <expr>
+            <expr_base>
+              <var name="x"/>
+            </expr_base>
+            <expr_tail>
+              <expr_sel>
+                <token type="IDCOLON">value:</token>
+                <expr_base>
+                  <token type="INT">1</token>
+                </expr_base>
+                <expr_sel/>
+              </expr_sel>
+            </expr_tail>
+          </expr>
+        </assign>
+      </block>
+    </method>
+  </class>
+</program>
+
