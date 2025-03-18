@@ -8,24 +8,24 @@ from xml.dom import minidom
 
 # predelat celou gramatiku
 grammar = '''
-program: class*                                        # pravidlo 1,2
+program: class*                                     # pravidlo 1,2
 
-class: "class" CID ":" CID "{" method* "}"              # pravidlo 3,5; method* resi, ze muze byt 0 nebo vice method
+class: "class" CID ":" CID "{" method* "}"          # pravidlo 3,5
 
-method: selector block                                # pravidlo 4; method? - volitelne, muze a nemusi byt dalsi metoda
+method: selector block                              # pravidlo 4
 
-selector: ID | IDCOLON selector_tail*                         # pravidlo 7,9
-selector_tail: IDCOLON                                   # pravidlo 8
+selector: ID | IDCOLON selector_tail*               # pravidlo 6,7,9
+selector_tail: IDCOLON                              # pravidlo 8
 
-block: "[" block_par "|" block_stat "]"                   # pravidlo 10,12,14
-block_par: COLONID*                                    # pravidlo 11  
-block_stat: (ID ":=" expr ".")*                      # pravidlo 13
+block: "[" block_par "|" block_stat "]"             # pravidlo 10
+block_par: COLONID*                                 # pravidlo 11,12  
+block_stat: (ID ":=" expr ".")*                     # pravidlo 13,14
 
-expr: expr_base expr_tail                             # pravidlo 15
-expr_tail: ID | expr_sel                                       # pravidlo 16
-expr_sel: IDCOLON expr_base expr_sel |                          # pravidlo 18
+expr: expr_base expr_tail                           # pravidlo 15
+expr_tail: ID | expr_sel                            # pravidlo 16,17
+expr_sel: IDCOLON expr_base expr_sel |              # pravidlo 18,19
 
-expr_base:  KEYWORD | CID | ID | INT | STRING | block | "(" expr ")"        # pravidlo 20,21,22
+expr_base:  KEYWORD | CID | ID | INT | STRING | block | "(" expr ")"    # pravidlo 20,21,22
 
 IDCOLON: ID ":"
 COLONID: ":" ID
@@ -35,17 +35,16 @@ CID: "Object" | "Nil" | "True" | "False" | "Integer" | "String" | "Block" | /[A-
 ID: /[a-z_][a-zA-Z0-9_]*/
 INT: /[+-]?[0-9]+/
 
-
-STRING: /'([^']|\\')*'/          
+STRING: /'([^']|\\')*'/                             # je schopne se zbavit jen liche apostrofy, ale povoluje jeji escape sekvenci
 
 %import common.WS
 %ignore WS
 '''
 
 class ASTToXML:
-    def __init__(self, description=""):
+    def __init__(self, description=''):                         # zavolano po vytvoreni objektu
         self.root = ET.Element('program', language='SOL25')
-        if description:
+        if description!='':
             self.root.set('description', description)
 
     def convert(self, node):
@@ -89,7 +88,7 @@ class ASTToXML:
                 if node.children[0].children:
                     self._convert_node(node.children[0], elem, par_count=par_count)
                 elif par_count != 0:
-                    sys.exit(22)
+                    sys.exit(33)
                 if node.children[1].children:
                     self._convert_node(node.children[1], elem)
             elif node.data == "block_par":
@@ -98,7 +97,7 @@ class ASTToXML:
                     par_counter += 1
                     elem = ET.SubElement(parent_elem, "parameter", order=str(par_counter), name=child[1:])
                 if par_counter != par_count:
-                    sys.exit(22)
+                    sys.exit(33)
             elif node.data == "block_stat":
                 assign_counter = 1
                 for child in node.children[::2]:
@@ -117,7 +116,7 @@ class ASTToXML:
                         selector = self._build_selector(node.children[1])
                         par_count = selector.count(":") if selector else 0
                     else:
-                        sys.exit(22) # chyba syntaxe
+                        sys.exit(22)    # chyba syntaxe
                     elem = ET.SubElement(expr_elem, "send", selector=selector)
                     if isinstance(node.children[0].children[0],Token):
                         self._convert_node(node.children[0], elem)
@@ -168,18 +167,25 @@ class ASTToXML:
             if node.children[2].children:
                 selector += self._build_selector(node.children[2])
             return selector
-        return "chyba, failed _build_selector" # sys.exit(22) asi, jestli je toto chyba syntaxe
+        return "chyba, failed _build_selector" 
 
     def to_pretty_xml(self):                                        # ET nema obdobnou fnc k toprettyxml, proto vyuziji tu v minidom
         rough_string = ET.tostring(self.root, encoding='utf-8')     # prvne prevedu xml v objektu ET do podoby retezce, protoze chci potrebuji xml v minidom objektu, abych mohl vyuzit jeho fnc
         reparsed = minidom.parseString(rough_string)                # pote si zpet poskladam xml tentokrat v minidom objektu
-        pretty_xml = reparsed.toprettyxml(indent="  ")              # finalne ho pomoci fnc zkraslim
+        pretty_xml = reparsed.toprettyxml(indent="  ")              # finalne ho pomoci fnc zkrasli
         return '<?xml version="1.0" encoding="UTF-8"?>\n' + pretty_xml.split('\n', 1)[1]
 
 def print_help():
     help_message = """
-    Usage: parse.py [--help]
-    --help      Display this help message
+
+    Usage: python3.11 parse.py [--help]
+    - Display this help message
+
+    Usage: python3.11 parse.py <input_file >output_file 2>error_file   
+    - start main function: sol25 -> xml
+    - input = stdin
+    - output = stout
+
     """
     print(help_message)
 
@@ -204,7 +210,7 @@ if __name__ == "__main__":
         sys.exit(10)
     
     if len(sys.argv) == 2:
-        if sys.argv[1] == "--help":
+        if sys.argv[1] == "--help" or sys.argv[1] == "-h":
             print_help()
             sys.exit(0)
         else:
@@ -212,14 +218,10 @@ if __name__ == "__main__":
             sys.exit(10)
     try:
         source_code = sys.stdin.read()
-        first_comment = ""
-        #for line in source_code.splitlines():
-        #    if line.strip().startswith("#"):
-        #        first_comment = line.strip()[1:].strip().replace(" ", "&nbsp;")
-        #        break
-
+        first_comment = ''
+        
         parse_tree = parse_file(source_code)
-        print(parse_tree.pretty())
+        #print(parse_tree.pretty())
 
         xml_converter = ASTToXML(description=first_comment)
         xml_converter.convert(parse_tree)
