@@ -1,5 +1,5 @@
 import sys
-from lark import Lark, Transformer, UnexpectedToken, Tree, Token
+from lark import Lark, Transformer, UnexpectedToken, UnexpectedCharacters, Tree, Token
 # import inspect, itertools, uuid
 # from sol import SOLObject
 # from multiprocessing.managers import Value
@@ -25,29 +25,22 @@ expr: expr_base expr_tail                             # pravidlo 15
 expr_tail: ID | expr_sel                                       # pravidlo 16
 expr_sel: IDCOLON expr_base expr_sel |                          # pravidlo 18
 
-expr_base: INT | STRING | ID | CID | block | "(" expr ")" | KEYWORD         # pravidlo 20,21,22
+expr_base:  KEYWORD | CID | ID | INT | STRING | block | "(" expr ")"        # pravidlo 20,21,22
 
 IDCOLON: ID ":"
 COLONID: ":" ID
 
+KEYWORD: "self" | "super" | "nil" | "true" | "false"
 CID: "Object" | "Nil" | "True" | "False" | "Integer" | "String" | "Block" | /[A-Z][a-zA-Z0-9]*/
 ID: /[a-z_][a-zA-Z0-9_]*/
 INT: /[+-]?[0-9]+/
-KEYWORD: "self" | "super" | "nil" | "true" | "false"
-STRING: /'([^'\\]|\\[n\\'])*'/ 
+
+
+STRING: /'([^']|\\')*'/          
 
 %import common.WS
 %ignore WS
 '''
-# STRING: "\'" /.*?/ /(?<!\\)(\\\\)*?/ "\'"
-
-
-def print_help():
-    help_message = """
-    Usage: parse.py [--help]
-    --help      Display this help message
-    """
-    print(help_message)
 
 class ASTToXML:
     def __init__(self, description=""):
@@ -61,10 +54,13 @@ class ASTToXML:
 
     def _convert_node(self, node, parent_elem, selector_name=None, par_count=0):
         if isinstance(node, Token):
-            if node.type == 'ID':
+            if node.type == 'ID' or node.type == 'CID':
                 elem = ET.SubElement(parent_elem, "var", name=node.value)
             elif node.type == 'INT':
                 attributes = {"class": "Integer", "value": node.value}
+                elem = ET.SubElement(parent_elem, "literal", **attributes)
+            elif node.type == 'STRING':
+                attributes = {"class": "String", "value": node.value[1:-1]}
                 elem = ET.SubElement(parent_elem, "literal", **attributes)
             else:
                 elem = ET.SubElement(parent_elem, "token", type=node.type)
@@ -87,6 +83,8 @@ class ASTToXML:
                 elem = ET.SubElement(parent_elem, "method", selector=selector)     
                 self._convert_node(node.children[1], elem, selector, arity)
             elif node.data == "block":
+                if parent_elem.tag == "arg":
+                    parent_elem = ET.SubElement(parent_elem, "expr")
                 elem = ET.SubElement(parent_elem, "block", arity=str(par_count))
                 if node.children[0].children:
                     self._convert_node(node.children[0], elem, par_count=par_count)
@@ -110,7 +108,7 @@ class ASTToXML:
                     assign_counter += 1
             elif node.data == "expr":
                 expr_elem = ET.SubElement(parent_elem, "expr")
-                try:                    
+                try:                    # pokud je expr->expr_tail->token(ID) nebo expr->expr_tail->token(CID)
                     selector = node.children[1].children[0].value
                     elem = ET.SubElement(expr_elem, "send", selector=selector)
                     self._convert_node(node.children[0], elem)
@@ -121,7 +119,10 @@ class ASTToXML:
                     else:
                         sys.exit(22) # chyba syntaxe
                     elem = ET.SubElement(expr_elem, "send", selector=selector)
-                    self._convert_node(node.children[0], elem)
+                    if isinstance(node.children[0].children[0],Token):
+                        self._convert_node(node.children[0], elem)
+                    elif isinstance(node.children[0].children[0],Tree):
+                        self._convert_node(node.children[0].children[0], elem)
                     try:
                         par_count_check = self._convert_send_arguments(node.children[1].children[0], elem)
                         if par_count != par_count_check:
@@ -130,7 +131,6 @@ class ASTToXML:
                     except:
                         sys.exit(22)
             elif node.data == "expr_base":
-                #print(node.children)
                 elem = ET.SubElement(parent_elem, "expr")
                 self._convert_node(node.children[0], elem)
             else: 
@@ -139,7 +139,6 @@ class ASTToXML:
                     self._convert_node(child, elem)
             return elem
 
-        # Handle other types if necessary
         elem = ET.SubElement(parent_elem, "unknown")
         elem.text = str(node)
         return elem
@@ -177,25 +176,27 @@ class ASTToXML:
         pretty_xml = reparsed.toprettyxml(indent="  ")              # finalne ho pomoci fnc zkraslim
         return '<?xml version="1.0" encoding="UTF-8"?>\n' + pretty_xml.split('\n', 1)[1]
 
-##--------------------------------------
-def find_selector_tail(node):
-    if isinstance(node, Tree) and node.data == "selector_tail":
-        return node  # Found the selector_tail
-    if hasattr(node, "children"):  # Check if the node has children
-        for child in node.children:
-            result = find_selector_tail(child)  # Recursively search in children
-            if result:
-                return result
-    return None  # Not found
-##--------------------------------------
+def print_help():
+    help_message = """
+    Usage: parse.py [--help]
+    --help      Display this help message
+    """
+    print(help_message)
 
 def parse_file(source):
     try:
         parser = Lark(grammar, start='program', parser='lalr')
         # bude se ridit gramatikou popsanou v grammer, zacne se v pravidlem program, parser='lalr' - vyuzije se jako typ parseru LALR(1), ktery je efektivnejsi
         return parser.parse(source)
-    except:
-        sys.exit(21) # chyba lexikalni nebo syntakticka?
+    except UnexpectedCharacters:
+        print(f"Unexpected characters in input", file=sys.stderr)
+        sys.exit(21)    # lexikal
+    except UnexpectedToken:
+        print(f"Unexpected token in input", file=sys.stderr)
+        sys.exit(22)    # syntax
+    except Exception as e:
+        print(f"Error parsing file: {e}", file=sys.stderr)
+        sys.exit(99)
 
 if __name__ == "__main__":
     if len(sys.argv) > 2:
