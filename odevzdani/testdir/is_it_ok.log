@@ -1,0 +1,7 @@
+Archive:  xsustro00.zip
+  inflating: parse.py                
+ extracting: readme1.pdf             
+
+    Usage: parse.py [--help]
+    --help      Display this help message
+    
